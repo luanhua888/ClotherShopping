@@ -73,11 +73,11 @@ class _SignUpState extends State<SignUp> {
       "UserGender": isMale == true ? "Male" : "Female",
       "UserNumber": phoneNumber.text,
     });
-    // Navigator.of(context)
-    //     .pushReplacement(MaterialPageRoute(builder: (ctx) => HomePage()));
-    // setState(() {
-    //   isLoading = false;
-    // });
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (ctx) => Login()));
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void vaildation() async {
@@ -258,7 +258,6 @@ class _SignUpState extends State<SignUp> {
         children: [
           Container(
             height: 200,
-         
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

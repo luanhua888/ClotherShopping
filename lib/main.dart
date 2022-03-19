@@ -1,3 +1,5 @@
+import 'package:e_commerce/screens/homepage.dart';
+import 'package:e_commerce/screens/listproduct.dart';
 import 'package:e_commerce/screens/login.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
       ),
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      home: HomePage(),
     );
   }
 }
