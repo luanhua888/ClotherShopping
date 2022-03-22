@@ -1,323 +1,596 @@
+import 'package:e_commerce/model/categoryicon.dart';
+import 'package:e_commerce/model/usermodel.dart';
+import 'package:e_commerce/screens/about.dart';
+import 'package:e_commerce/screens/checkout.dart';
+
+import 'package:e_commerce/screens/contactus.dart';
+import 'package:e_commerce/screens/login.dart';
+
+import 'package:e_commerce/screens/profilescreen.dart';
+
+import '../provider/product_provider.dart';
+import '../provider/category_provider.dart';
+import 'package:e_commerce/screens/detailscreen.dart';
 import 'package:e_commerce/screens/listproduct.dart';
-import 'package:e_commerce/widgets/singleproduct.dart';
+import 'package:e_commerce/widgets/singeproduct.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
+import 'package:provider/provider.dart';
+import '../model/product.dart';
+import '../widgets/notification_button.dart';
 
 class HomePage extends StatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
+
+Product menData;
+CategoryProvider categoryProvider;
+ProductProvider productProvider;
+
+Product womenData;
+
+Product bulbData;
+
+Product smartPhoneData;
 
 class _HomePageState extends State<HomePage> {
   Widget _buildCategoryProduct({String image, int color}) {
     return CircleAvatar(
-      maxRadius: 36,
+      maxRadius: height * 0.1 / 2.3,
       backgroundColor: Color(color),
-      backgroundImage: AssetImage("images/$image"),
+      child: Container(
+        height: 60,
+        child: Image(
+          // color: Colors.white,
+          image: NetworkImage(image),
+        ),
+      ),
     );
   }
 
+  dynamic height, width;
   bool homeColor = true;
 
-  bool cartColor = false;
+  bool checkoutColor = false;
 
   bool aboutColor = false;
 
-  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _key,
-      drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text(
-                "Luan",
-                style: TextStyle(color: Colors.black),
-              ),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: AssetImage("images/userImage.png"),
-              ),
-              accountEmail: Text(
-                "luan@gmail.com",
-                style: TextStyle(color: Colors.black),
-              ),
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 24, 191, 233),
-              ),
-            ),
-            ListTile(
-              selected: homeColor,
-              onTap: () {
-                setState(() {
-                  aboutColor = false;
-                  cartColor = false;
-                  homeColor = true;
-                });
-              },
-              leading: Icon(Icons.home),
-              title: Text("Home"),
-            ),
-            ListTile(
-              selected: cartColor,
-              onTap: () {
-                setState(() {
-                  aboutColor = false;
-                  cartColor = true;
-                  homeColor = false;
-                });
-              },
-              leading: Icon(Icons.shopping_cart),
-              title: Text("Cart"),
-            ),
-            ListTile(
-              onTap: () {
-                setState(() {});
-              },
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-            ),
-            ListTile(
-              selected: aboutColor,
-              onTap: () {
-                setState(() {
-                  aboutColor = true;
-                  cartColor = false;
-                  homeColor = false;
-                });
-              },
-              leading: Icon(Icons.info),
-              title: Text("About"),
-            ),
-          ],
+  bool contactUsColor = false;
+  bool profileColor = false;
+  MediaQueryData mediaQuery;
+  Widget _buildUserAccountsDrawerHeader() {
+    List<UserModel> userModel = productProvider.userModelList;
+    return Column(
+        children: userModel.map((e) {
+      return UserAccountsDrawerHeader(
+        accountName: Text(
+          e.userName,
+          style: TextStyle(color: Colors.black),
         ),
-      ),
-      appBar: AppBar(
-        title: Text("HomePage", style: TextStyle(color: Colors.black)),
-        centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: Colors.grey[400],
-        leading: IconButton(
-            onPressed: () {
-              _key.currentState.openDrawer();
+        currentAccountPicture: CircleAvatar(
+          // backgroundColor: Colors.white,
+          backgroundImage: e.userImage == null
+              ? AssetImage("images/userImage.png")
+              : NetworkImage(e.userImage),
+        ),
+        decoration: BoxDecoration(color: Color(0xfff2f2f2)),
+        accountEmail: Text(e.userEmail, style: TextStyle(color: Colors.black)),
+      );
+    }).toList());
+  }
+
+  Widget _buildMyDrawer() {
+    return Drawer(
+      child: ListView(
+        children: <Widget>[
+          _buildUserAccountsDrawerHeader(),
+          ListTile(
+            selected: homeColor,
+            onTap: () {
+              setState(() {
+                homeColor = true;
+                contactUsColor = false;
+                checkoutColor = false;
+                aboutColor = false;
+                profileColor = false;
+              });
             },
-            icon: Icon(
-              Icons.menu,
-              color: Colors.black,
-            )),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.search,
-                color: Colors.black,
-              )),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.notifications_none,
-                color: Colors.black,
-              )),
+            leading: Icon(Icons.home),
+            title: Text("Home"),
+          ),
+          ListTile(
+            selected: checkoutColor,
+            onTap: () {
+              setState(() {
+                checkoutColor = true;
+                contactUsColor = false;
+                homeColor = false;
+                profileColor = false;
+                aboutColor = false;
+              });
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => CheckOut()));
+            },
+            leading: Icon(Icons.shopping_cart),
+            title: Text("Checkout"),
+          ),
+          ListTile(
+            selected: aboutColor,
+            onTap: () {
+              setState(() {
+                aboutColor = true;
+                contactUsColor = false;
+                homeColor = false;
+                profileColor = false;
+                checkoutColor = false;
+              });
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => About()));
+            },
+            leading: Icon(Icons.info),
+            title: Text("About"),
+          ),
+          ListTile(
+            selected: profileColor,
+            onTap: () {
+              setState(() {
+                aboutColor = false;
+                contactUsColor = false;
+                homeColor = false;
+                profileColor = true;
+                checkoutColor = false;
+              });
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (ctx) => ProfileScreen(),
+                ),
+              );
+            },
+            leading: Icon(Icons.info),
+            title: Text("Profile"),
+          ),
+          ListTile(
+            selected: contactUsColor,
+            onTap: () {
+              setState(() {
+                contactUsColor = true;
+                checkoutColor = false;
+                profileColor = false;
+                homeColor = false;
+                aboutColor = false;
+              });
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => ContactUs()));
+            },
+            leading: Icon(Icons.phone),
+            title: Text("Contant Us"),
+          ),
+          ListTile(
+            onTap: () {
+              FirebaseAuth.instance.signOut();
+            },
+            leading: Icon(Icons.exit_to_app),
+            title: Text("Logout"),
+          ),
         ],
       ),
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        margin: EdgeInsets.symmetric(horizontal: 10),
-        child: ListView(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+
+  Widget _buildImageSlider() {
+    return Container(
+      height: height * 0.3,
+      child: Carousel(
+        autoplay: true,
+        showIndicator: true,
+        images: [
+          AssetImage("images/puzzlesshirt.png"),
+          AssetImage("images/Jacket.png"),
+          AssetImage("images/Screen.webp"),
+          NetworkImage(
+              "https://sc04.alicdn.com/kf/H842af3913cf6402ba14425dfa52e2b3c0.jpg"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDressIcon() {
+    List<CategoryIcon> dressIcon = categoryProvider.getDressIcon;
+    List<Product> dress = categoryProvider.getDressList;
+    return Row(
+        children: dressIcon.map((e) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ListProduct(
+                name: "Dress",
+                snapShot: dress,
+              ),
+            ),
+          );
+        },
+        child: _buildCategoryProduct(image: e.image, color: 0xff33dcfd),
+      );
+    }).toList());
+  }
+
+  Widget _buildShirtIcon() {
+    List<Product> shirts = categoryProvider.getShirtList;
+    List<CategoryIcon> shirtIcon = categoryProvider.getShirtIconData;
+    return Row(
+        children: shirtIcon.map((e) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ListProduct(
+                name: "Shirt",
+                snapShot: shirts,
+              ),
+            ),
+          );
+        },
+        child: _buildCategoryProduct(image: e.image, color: 0xfff38cdd),
+      );
+    }).toList());
+  }
+
+  Widget _buildShoeIcon() {
+    List<CategoryIcon> shoeIcon = categoryProvider.getShoeIcon;
+    List<Product> shoes = categoryProvider.getshoesList;
+    return Row(
+        children: shoeIcon.map((e) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ListProduct(
+                name: "Shoes",
+                snapShot: shoes,
+              ),
+            ),
+          );
+        },
+        child: _buildCategoryProduct(
+          image: e.image,
+          color: 0xff4ff2af,
+        ),
+      );
+    }).toList());
+  }
+
+  Widget _buildPantIcon() {
+    List<CategoryIcon> pantIcon = categoryProvider.getPantIcon;
+    List<Product> pant = categoryProvider.getPantList;
+    return Row(
+        children: pantIcon.map((e) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ListProduct(
+                name: "Pant",
+                snapShot: pant,
+              ),
+            ),
+          );
+        },
+        child: _buildCategoryProduct(
+          image: e.image,
+          color: 0xff74acf7,
+        ),
+      );
+    }).toList());
+  }
+
+  Widget _buildTieIcon() {
+    List<CategoryIcon> tieIcon = categoryProvider.getTieIcon;
+    List<Product> tie = categoryProvider.getTieList;
+    return Row(
+        children: tieIcon.map((e) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ListProduct(
+                name: "Tie",
+                snapShot: tie,
+              ),
+            ),
+          );
+        },
+        child: _buildCategoryProduct(
+          image: e.image,
+          color: 0xfffc6c8d,
+        ),
+      );
+    }).toList());
+  }
+
+  Widget _buildCategory() {
+    return Column(
+      children: <Widget>[
+        Container(
+          height: height * 0.1 - 30,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                "Categorie",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: 60,
+          child: Expanded(
+            child: Row(
               children: <Widget>[
-                Container(
-                  height: 250,
-                  width: 310,
-                  child: Carousel(
-                    autoplay: true,
-                    showIndicator: false,
-                    images: [
-                      NetworkImage(
-                          'https://image.cellphones.com.vn/358x/media/catalog/product/i/p/iphone_13-_pro-5_4_1.jpg'),
-                      NetworkImage(
-                          'https://image.cellphones.com.vn/358x/media/catalog/product/m/i/mieng-sac-khong-day-energizer-magpa-wcp119bk-1.jpg'),
-                      NetworkImage(
-                          'https://image.cellphones.com.vn/220x/media/catalog/product/w/a/watch_3_leather.jpg'),
-                      NetworkImage(
-                          'https://image.cellphones.com.vn/220x/media/catalog/product/m/a/macbook-pro-2021-007_1.jpg'),
-                      NetworkImage(
-                          'https://image.cellphones.com.vn/220x/media/catalog/product/a/p/apple_ipad_pro_11_2021_m1_wifi_128gb.png'),
-                      NetworkImage(
-                          'https://cdn.cellphones.com.vn/media/catalog/product/cache/7/small_image/220x175/9df78eab33525d08d6e5fb8d27136e95/b/e/beats-solo-pro.jpg'),
-                    ],
+                _buildDressIcon(),
+                _buildShirtIcon(),
+                _buildShoeIcon(),
+                _buildPantIcon(),
+                _buildTieIcon(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeature() {
+    List<Product> featureProduct;
+
+    featureProduct = productProvider.getFeatureList;
+
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              "Featured",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (ctx) => ListProduct(
+                      name: "Featured",
+                      isCategory: true,
+                      snapShot: featureProduct,
+                    ),
                   ),
-                ),
-                Container(
-                  height: 30,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Categori",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "View more",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: 50,
-                  child: Row(
-                    children: <Widget>[
-                      _buildCategoryProduct(
-                          image: "dress.jpg", color: 0xff33dcfd),
-                      _buildCategoryProduct(
-                          image: "shirt.png", color: 0xfff38cdd),
-                      _buildCategoryProduct(
-                          image: "shoes.jpg", color: 0xfff38cdd),
-                      _buildCategoryProduct(
-                          image: "tie.png", color: 0xfff38cdd),
-                      _buildCategoryProduct(
-                          image: "pant.png", color: 0xfff38cdd),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: 60,
-                  width: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        height: 20,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text(
-                                  "Featured",
-                                  style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (ctx) => ListProduct(
-                                          name: "Featured",
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    "View more",
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              ],
+                );
+              },
+              child: Text(
+                "View more",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: productProvider.getHomeFeatureList.map((e) {
+            return Expanded(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (ctx) => DetailScreen(
+                              image: e.image,
+                              price: e.price,
+                              name: e.name,
                             ),
-                          ],
-                        ),
+                          ),
+                        );
+                      },
+                      child: SingleProduct(
+                        image: e.image,
+                        price: e.price,
+                        name: e.name,
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (ctx) => DetailScreen(
+                              image: e.image, price: e.price, name: e.name),
+                        ),
+                      );
+                    },
+                    child: SingleProduct(
+                      image: e.image,
+                      price: e.price,
+                      name: e.name,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewAchives() {
+    List<Product> newAchivesProduct = productProvider.getNewAchiesList;
+    return Column(
+      children: <Widget>[
+        Container(
+          height: height * 0.1 - 30,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    "New Achives",
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (ctx) => ListProduct(
+                            name: "NewAchvies",
+                            isCategory: false,
+                            snapShot: newAchivesProduct,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "View more",
+                      style:
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+        Row(
+            children: productProvider.getHomeAchiveList.map((e) {
+          return Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            SingleProduct(
-                                image: "Jacket.png",
-                                price: 30.0,
-                                name: "MONO TRACK JACKET"),
-                            SingleProduct(
-                                image: "puzzlesshirt.png",
-                                price: 25.0,
-                                name: "PUZZLE SHIRT"),
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 20,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Expanded(
+                      child: Row(
                         children: <Widget>[
-                          Text(
-                            "New achives",
-                            style: TextStyle(
-                                fontSize: 17, fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (ctx) => DetailScreen(
+                                      image: e.image,
+                                      price: e.price,
+                                      name: e.name,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: SingleProduct(
+                                  image: e.image, price: e.price, name: e.name),
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                  builder: (ctx) => ListProduct(
-                                    name: "New achives",
+                                  builder: (ctx) => DetailScreen(
+                                    image: e.image,
+                                    price: e.price,
+                                    name: e.name,
                                   ),
                                 ),
                               );
                             },
-                            child: Text(
-                              "View more",
-                              style: TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold),
-                            ),
+                            child: SingleProduct(
+                                image: e.image, price: e.price, name: e.name),
                           )
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(),
-                        Row(
-                          children: <Widget>[
-                            SingleProduct(
-                                image: "manpant.jpg",
-                                price: 32.0,
-                                name: "Men Pant"),
-                            SingleProduct(
-                                image: "mantie.jpg",
-                                price: 26.0,
-                                name: "Men Tie"),
-                          ],
-                        )
-                      ],
-                    ),
+                    )
                   ],
                 ),
               ],
             ),
+          );
+        }).toList()),
+      ],
+    );
+  }
+
+  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+  void getCallAllFunction() {
+    categoryProvider.getShirtData();
+    categoryProvider.getDressData();
+    categoryProvider.getShoesData();
+    categoryProvider.getPantData();
+    categoryProvider.getTieData();
+    categoryProvider.getDressIconData();
+    productProvider.getNewAchiveData();
+    productProvider.getFeatureData();
+    productProvider.getHomeFeatureData();
+    productProvider.getHomeAchiveData();
+    categoryProvider.getShirtIcon();
+    categoryProvider.getshoesIconData();
+    categoryProvider.getPantIconData();
+    categoryProvider.getTieIconData();
+    productProvider.getUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    categoryProvider = Provider.of<CategoryProvider>(context);
+    productProvider = Provider.of<ProductProvider>(context);
+    getCallAllFunction();
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      key: _key,
+      drawer: _buildMyDrawer(),
+      appBar: AppBar(
+        title: Text(
+          "HomePage",
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+        elevation: 0.0,
+        backgroundColor: Colors.grey[100],
+        leading: IconButton(
+            icon: Icon(
+              Icons.menu,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              _key.currentState.openDrawer();
+            }),
+        actions: <Widget>[
+          NotificationButton(),
+        ],
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        margin: EdgeInsets.symmetric(horizontal: 20),
+        child: ListView(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildImageSlider(),
+                  _buildCategory(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildFeature(),
+                  _buildNewAchives()
+                ],
+              ),
+            )
           ],
         ),
       ),

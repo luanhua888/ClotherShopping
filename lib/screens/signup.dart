@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:e_commerce/screens/homepage.dart';
+import 'package:e_commerce/screens/homepage.dart';
 import 'package:e_commerce/screens/login.dart';
 import 'package:e_commerce/widgets/changescreen.dart';
 import 'package:e_commerce/widgets/mybutton.dart';
@@ -74,7 +74,7 @@ class _SignUpState extends State<SignUp> {
       "UserNumber": phoneNumber.text,
     });
     Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (ctx) => Login()));
+        .pushReplacement(MaterialPageRoute(builder: (ctx) => HomePage()));
     setState(() {
       isLoading = false;
     });
@@ -258,6 +258,7 @@ class _SignUpState extends State<SignUp> {
         children: [
           Container(
             height: 200,
+         
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
